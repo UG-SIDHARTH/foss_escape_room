@@ -1,5 +1,5 @@
 # Stage 1: Build the React frontend
-FROM node:22-slim AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app/client
 COPY client/package*.json ./
@@ -9,9 +9,13 @@ COPY client/ ./
 RUN npm run build
 
 # Stage 2: Setup the Express backend
-FROM node:22-slim
+FROM node:22-alpine
 
 WORKDIR /app
+
+# Install build dependencies required by node-gyp to compile better-sqlite3 from source
+RUN apk add --no-cache python3 make g++
+
 COPY server/package*.json ./server/
 WORKDIR /app/server
 RUN npm install --production
@@ -26,7 +30,7 @@ COPY server/ ./
 COPY --from=builder /app/client/dist /app/client/dist
 
 # Expose the backend port
-EXPOSE 3001
+EXPOSE 6001
 
 # Run the backend server
 CMD ["node", "index.js"]
