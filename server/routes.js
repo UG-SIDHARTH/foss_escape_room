@@ -39,6 +39,10 @@ function authenticateAdmin(req, res, next) {
 // GET /api/admin/teams - fetch full team state for dashboard
 router.get('/admin/teams', authenticateAdmin, (req, res) => {
   const teams = db.prepare('SELECT * FROM teams').all();
+  teams.forEach(t => {
+    t.keys_discovered = JSON.parse(t.keys_discovered || '[]');
+    t.level_variants = JSON.parse(t.level_variants || '{}');
+  });
   res.json(teams);
 });
 
