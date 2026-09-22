@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: foss-escape-room
+    ports:
+      - "6001:6001"
+    restart: unless-stopped
+    volumes:
+      # Mount the .env file so the container can access the admin password & JWT secret
+      - ./server/.env:/app/server/.env
+      # (Optional) Mount the local database so it persists across container restarts
+      - ./server/escape_room.db:/app/server/escape_room.db
