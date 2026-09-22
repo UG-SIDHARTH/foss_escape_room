@@ -132,9 +132,11 @@ function MissionDashboard() {
         </div>
       </header>
 
-      <div className="flex gap-4" style={{ flexGrow: 1 }}>
-        <aside className="flex-col gap-4 p-4" style={{ width: '250px', borderRight: '1px solid var(--text-color)' }}>
-          <h3>&gt; INVENTORY</h3>
+      <div className="responsive-layout" style={{ height: 'calc(100vh - 80px)' }}>
+        <aside className="sidebar flex-col gap-4 p-4">
+          <h3>&gt; STATS</h3>
+          <p>TEAM: {team.team_name}</p>
+          <p>LEVEL: {team.current_level}</p>
           <ul style={{ listStyleType: 'none', padding: 0 }}>
             {team.keys_discovered.length === 0 && <li style={{ opacity: 0.5 }}>Empty</li>}
             {team.keys_discovered.map((k, i) => (
@@ -158,7 +160,7 @@ function MissionDashboard() {
           )}
         </aside>
 
-        <main className="p-8 flex-col items-center" style={{ flexGrow: 1 }}>
+        <main className="main-content flex-col p-8 items-center" style={{ overflowY: 'auto' }}>
           {successMsg && <div className="text-amber mb-4 p-2" style={{ border: '1px solid var(--accent-color)', width: '100%', textAlign: 'center' }}>&gt; {successMsg}</div>}
           {errorMsg && <div className="text-red mb-4 p-2" style={{ border: '1px solid var(--error-color)', width: '100%', textAlign: 'center' }}>&gt; ERR: {errorMsg}</div>}
           

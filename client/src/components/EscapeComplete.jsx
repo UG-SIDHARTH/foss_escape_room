@@ -30,7 +30,7 @@ function EscapeComplete() {
     <div className="container flex-col items-center justify-center" style={{ minHeight: '100vh', textAlign: 'center' }}>
       <h1 className="text-4xl text-amber glitch mb-8">&gt; ESCAPE COMPLETE</h1>
       
-      <div className="p-8" style={{ border: '2px solid var(--accent-color)', maxWidth: '600px', width: '100%' }}>
+      <div className="p-8" style={{ border: '2px solid var(--accent-color)', maxWidth: '600px', width: '100%', boxSizing: 'border-box' }}>
         <h2 className="mb-4">CERTIFICATE OF COMPLETION</h2>
         <p className="mb-4 text-2xl">{team.team_name}</p>
         <p className="mb-4">Operatives: {team.members}</p>

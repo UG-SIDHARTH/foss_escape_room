@@ -41,7 +41,7 @@ function Registration() {
       <h1 className="text-4xl glitch mb-4">&gt; FOSS_ESCAPE_ROOM</h1>
       <p className="mb-4 text-amber">INITIATE TEAM SEQUENCE</p>
       
-      <form onSubmit={handleSubmit} className="flex-col gap-4" style={{ width: '400px' }}>
+      <form onSubmit={handleSubmit} className="flex-col gap-4" style={{ width: '100%', maxWidth: '400px' }}>
         <div className="flex-col">
           <label>&gt; TEAM_IDENTIFIER</label>
           <input 

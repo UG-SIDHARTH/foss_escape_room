@@ -135,3 +135,41 @@ button:disabled:hover {
   80% { transform: translate(2px, -2px) }
   100% { transform: translate(0) }
 }
+
+/* --- Responsive Dashboard Layout --- */
+.responsive-layout {
+  display: flex;
+  flex-direction: row;
+}
+.sidebar {
+  width: 250px;
+  border-right: 1px solid var(--text-color);
+  flex-shrink: 0;
+}
+.main-content {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .responsive-layout {
+    flex-direction: column;
+    height: auto !important; /* allow scrolling on mobile */
+  }
+  .sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--text-color);
+    padding: 10px;
+  }
+  .main-content {
+    padding: 20px !important;
+  }
+  
+  /* Make all tables scrollable on mobile */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+

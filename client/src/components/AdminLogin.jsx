@@ -32,7 +32,7 @@ function AdminLogin() {
     <div className="flex-col items-center" style={{ minHeight: '100vh', justifyContent: 'center' }}>
       <h1 className="text-amber mb-4">&gt; ADMIN_LOGIN</h1>
       {error && <div className="text-red mb-4">&gt; ERR: {error}</div>}
-      <form onSubmit={handleLogin} className="flex-col gap-4" style={{ width: '300px' }}>
+      <form onSubmit={handleLogin} className="flex-col gap-4" style={{ width: '100%', maxWidth: '300px' }}>
         <input 
           type="password" 
           placeholder="_ENTER_PASSWORD" 

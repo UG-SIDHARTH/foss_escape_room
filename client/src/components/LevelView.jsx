@@ -4,7 +4,7 @@ function LevelView({ level, levelName, levelText, onSubmit, isSubmitting }) {
   const [answer, setAnswer] = useState('');
   
   return (
-    <div className="flex-col" style={{ width: '100%', maxWidth: '600px' }}>
+    <div className="flex-col" style={{ width: '100%', maxWidth: '600px', boxSizing: 'border-box' }}>
       <div className="mb-4">
         <h2 className="text-amber">&gt; LEVEL {level}: {levelName ? levelName.toUpperCase() : 'UNKNOWN'}</h2>
         
