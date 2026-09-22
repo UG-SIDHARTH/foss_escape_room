@@ -10,10 +10,10 @@ const cookieParser = require('cookie-parser');
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 6001;
 
 app.use(cors({
-  origin: 'https://localhost:5173',
+  origin: ['https://localhost:6000', 'http://localhost:6000'],
   credentials: true
 }));
 app.use(express.json());

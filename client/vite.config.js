@@ -51,10 +51,11 @@ export default defineConfig(({ command, mode }) => {
       })
     ],
     server: {
+      port: 6000,
       https: true,
       proxy: {
         '/api': {
-          target: 'https://localhost:3001',
+          target: 'https://localhost:6001',
           changeOrigin: true,
           secure: false // Since the backend has a self-signed or invalid cert locally
         }
