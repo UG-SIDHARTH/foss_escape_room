@@ -48,7 +48,7 @@ router.get('/admin/teams', authenticateAdmin, (req, res) => {
 
 // GET /api/leaderboard - fetch public leaderboard state (stripped of secrets)
 router.get('/leaderboard', (req, res) => {
-  const teams = db.prepare('SELECT id, team_name, current_level, status, start_time, end_time, total_penalty_minutes, final_time FROM teams').all();
+  const teams = db.prepare('SELECT id, team_name, current_level, status, start_time, end_time, score, hints_used, final_time FROM teams').all();
   res.json(teams);
 });
 
@@ -142,13 +142,8 @@ router.post('/teams/:id/hint', (req, res) => {
   const team = db.prepare('SELECT * FROM teams WHERE id = ?').get(teamId);
   if (!team || team.status !== 'in_progress') return res.status(400).json({ error: 'Invalid team' });
 
-  if (team.hints_used >= 3) {
-    return res.status(400).json({ error: 'No hints remaining' });
-  }
-
-  // Add a 5 minute penalty per hint
-  const PENALTY_MINUTES = 5;
-  db.prepare('UPDATE teams SET hints_used = hints_used + 1, total_penalty_minutes = total_penalty_minutes + ? WHERE id = ?').run(PENALTY_MINUTES, teamId);
+  // Update hints used without time penalty
+  db.prepare('UPDATE teams SET hints_used = hints_used + 1 WHERE id = ?').run(teamId);
 
   const variants = JSON.parse(team.level_variants || '{}');
   const variantId = variants[team.current_level] !== undefined ? variants[team.current_level] : 0;
@@ -166,12 +161,23 @@ router.post('/teams/:id/finish', (req, res) => {
   if (team.current_level === 6) { // Make sure they actually solved level 6
     const end_time = Date.now();
     const elapsed_ms = end_time - team.start_time;
-    const final_time_ms = elapsed_ms + (team.total_penalty_minutes * 60 * 1000);
+    const elapsed_minutes = elapsed_ms / (1000 * 60);
 
-    db.prepare('UPDATE teams SET end_time = ?, final_time = ?, status = ? WHERE id = ?').run(
-      end_time, final_time_ms, 'escaped', teamId
+    let base_score = 0;
+    if (elapsed_minutes <= 15) base_score = 60;
+    else if (elapsed_minutes <= 30) base_score = 45;
+    else if (elapsed_minutes <= 45) base_score = 30;
+    else if (elapsed_minutes <= 60) base_score = 15;
+    else base_score = 0;
+
+    const hint_penalty = team.hints_used > 0 ? 10 : 0;
+    let final_score = Math.max(0, base_score - hint_penalty);
+    if (base_score === 0) final_score = 0; // No points after 60 mins
+
+    db.prepare('UPDATE teams SET end_time = ?, final_time = ?, score = ?, status = ? WHERE id = ?').run(
+      end_time, elapsed_ms, final_score, 'escaped', teamId
     );
-    res.json({ success: true, final_time: final_time_ms });
+    res.json({ success: true, score: final_score, final_time: elapsed_ms });
   } else {
     res.status(400).json({ error: 'Not finished yet' });
   }
@@ -179,21 +185,25 @@ router.post('/teams/:id/finish', (req, res) => {
 
 // GET /api/leaderboard - fetch public leaderboard state (stripped of secrets)
 router.get('/leaderboard', (req, res) => {
-  const teams = db.prepare('SELECT id, team_name, current_level, status, start_time, end_time, total_penalty_minutes, final_time FROM teams').all();
+  const teams = db.prepare('SELECT id, team_name, current_level, status, start_time, end_time, score, hints_used, final_time FROM teams').all();
   
   teams.forEach(t => {
     // calculate current time if still in progress
     if (t.status === 'in_progress') {
        const elapsed = Date.now() - t.start_time;
-       t.current_time_ms = elapsed + (t.total_penalty_minutes * 60 * 1000);
+       t.current_time_ms = elapsed;
     }
   });
 
-  // Sort: 'escaped' first by final_time, then 'in_progress' by level (desc) and current_time (asc)
+  // Sort: 'escaped' first by score (desc), then final_time (asc)
+  // 'in_progress' by level (desc) and current_time (asc)
   teams.sort((a, b) => {
     if (a.status === 'escaped' && b.status !== 'escaped') return -1;
     if (b.status === 'escaped' && a.status !== 'escaped') return 1;
-    if (a.status === 'escaped' && b.status === 'escaped') return a.final_time - b.final_time;
+    if (a.status === 'escaped' && b.status === 'escaped') {
+      if (b.score !== a.score) return b.score - a.score;
+      return a.final_time - b.final_time; // tie-breaker
+    }
     
     // Both in progress
     if (a.current_level !== b.current_level) return b.current_level - a.current_level;

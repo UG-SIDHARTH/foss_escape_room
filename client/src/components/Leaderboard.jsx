@@ -43,12 +43,13 @@ function Leaderboard() {
             <th className="p-4">LEVEL</th>
             <th className="p-4">HINTS</th>
             <th className="p-4">TIME</th>
+            <th className="p-4">SCORE</th>
           </tr>
         </thead>
         <tbody>
           {teams.length === 0 && (
             <tr>
-              <td colSpan="6" className="text-center p-4">&gt; NO DATA FOUND</td>
+              <td colSpan="7" className="text-center p-4">&gt; NO DATA FOUND</td>
             </tr>
           )}
           {teams.map((t, idx) => (
@@ -65,6 +66,9 @@ function Leaderboard() {
                 {t.status === 'escaped' 
                   ? formatTime(t.final_time) 
                   : t.status === 'in_progress' ? formatTime(t.current_time_ms) : '--'}
+              </td>
+              <td className="p-4">
+                {t.status === 'escaped' ? t.score : '--'}
               </td>
             </tr>
           ))}

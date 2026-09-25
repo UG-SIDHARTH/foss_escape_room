@@ -17,6 +17,7 @@ function initDb() {
       end_time INTEGER,
       total_penalty_minutes INTEGER DEFAULT 0,
       final_time INTEGER,
+      score INTEGER DEFAULT 0,
       status TEXT DEFAULT 'not_started', -- 'not_started', 'in_progress', 'escaped'
       keys_discovered TEXT DEFAULT '[]', -- JSON array of key strings
       level_variants TEXT DEFAULT '{}' -- JSON object of variants
@@ -35,9 +36,11 @@ function initDb() {
   
   try {
     db.exec(`ALTER TABLE teams ADD COLUMN level_variants TEXT DEFAULT '{}'`);
-  } catch(e) {
-    // Column might already exist
-  }
+  } catch(e) {}
+  
+  try {
+    db.exec(`ALTER TABLE teams ADD COLUMN score INTEGER DEFAULT 0`);
+  } catch(e) {}
 }
 
 initDb();
