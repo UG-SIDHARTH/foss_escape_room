@@ -170,6 +170,15 @@ router.post('/teams/:id/submit', (req, res) => {
     return res.status(400).json({ error: 'Invalid team or not in progress' });
   }
 
+  // Rate Limiter: Prevent brute-forcing by requiring 2 seconds between guesses
+  const lastAttempt = db.prepare('SELECT timestamp FROM level_attempts WHERE team_id = ? ORDER BY timestamp DESC LIMIT 1').get(teamId);
+  if (lastAttempt) {
+    const timeSinceLastAttempt = Date.now() - lastAttempt.timestamp;
+    if (timeSinceLastAttempt < 2000) {
+      return res.status(429).json({ message: 'RATE LIMIT: SYSTEM OVERLOAD. Wait 2 seconds before overriding again.' });
+    }
+  }
+
   const puzzle = getPuzzle(team.current_level);
   if (!puzzle) return res.status(500).json({ error: 'Puzzle not found' });
 
