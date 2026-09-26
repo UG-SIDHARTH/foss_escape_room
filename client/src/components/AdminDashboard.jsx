@@ -81,6 +81,30 @@ function AdminDashboard() {
 
   if (loading) return <div className="container">&gt; LOADING DIRECTOR TERMINAL...</div>;
 
+  const exportCSV = () => {
+    if (teams.length === 0) return;
+    const headers = ['ID', 'Alias', 'Full Name', 'Status', 'Level', 'Hints', 'Score', 'Final Time (ms)'];
+    const rows = teams.map(t => [
+      t.id,
+      `"${t.team_name.replace(/"/g, '""')}"`,
+      `"${t.members.replace(/"/g, '""')}"`,
+      t.status,
+      t.current_level,
+      t.hints_used,
+      t.score,
+      t.final_time || ''
+    ]);
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'agents_export.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="container" style={{ maxWidth: '100%' }}>
       <header className="flex-row justify-between items-center mb-8">
@@ -95,6 +119,10 @@ function AdminDashboard() {
 
       {activeTab === 'teams' && (
         <div className="panel" style={{ overflowX: 'auto' }}>
+          <div className="flex-row justify-between items-center mb-4">
+            <h2 className="text-blue">AGENT LOGS</h2>
+            <button className="gold" onClick={exportCSV}>&gt; EXPORT CSV</button>
+          </div>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
             <thead>
               <tr style={{ borderBottom: '2px solid var(--accent-blue)', textAlign: 'left' }}>
