@@ -64,7 +64,7 @@ function Registration() {
       {errorMsg && <div className="text-red mt-4">&gt; ERR: {errorMsg}</div>}
       
       <div className="mt-8">
-        <a href="/admin/login" className="text-blue" style={{ fontSize: '0.8rem' }}>[ SYSADMIN LOGIN ]</a>
+        <a href="/leaderboard" className="text-blue" style={{ fontSize: '0.8rem' }}>[ VIEW LEADERBOARD ]</a>
       </div>
     </div>
   );
