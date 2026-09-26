@@ -146,7 +146,7 @@ router.post('/teams/:id/submit', (req, res) => {
   );
 
   if (isCorrect) {
-    const key_reward = \`\${puzzle.title}_CORE\`;
+    const key_reward = `${puzzle.title}_CORE`;
     if (team.current_level < 6) {
       const keys = JSON.parse(team.keys_discovered || '[]');
       keys.push(key_reward);
