@@ -44,6 +44,28 @@ router.get('/admin/teams', authenticateAdmin, (req, res) => {
   res.json(teams);
 });
 
+router.post('/admin/event/start', authenticateAdmin, (req, res) => {
+  const start_time = Date.now();
+  const info = db.prepare("UPDATE teams SET status = 'in_progress', start_time = ? WHERE status = 'not_started'").run(start_time);
+  res.json({ success: true, message: `Started event for ${info.changes} waiting agents.` });
+});
+
+router.post('/admin/event/stop', authenticateAdmin, (req, res) => {
+  const end_time = Date.now();
+  const activeTeams = db.prepare("SELECT * FROM teams WHERE status = 'in_progress'").all();
+  
+  const updateStmt = db.prepare("UPDATE teams SET end_time = ?, final_time = ?, score = 0, status = 'timeout' WHERE id = ?");
+  const transaction = db.transaction((teams) => {
+    for (const team of teams) {
+      const elapsed_ms = end_time - team.start_time;
+      updateStmt.run(end_time, elapsed_ms, team.id);
+    }
+  });
+  transaction(activeTeams);
+  
+  res.json({ success: true, message: `Stopped event for ${activeTeams.length} active agents.` });
+});
+
 router.post('/admin/teams/:id/reset', authenticateAdmin, (req, res) => {
   const { id } = req.params;
   db.prepare("UPDATE teams SET current_level = 1, status = 'not_started', score = 0, hints_used = 0, keys_discovered = '[]' WHERE id = ?").run(id);

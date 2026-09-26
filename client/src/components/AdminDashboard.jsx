@@ -72,6 +72,22 @@ function AdminDashboard() {
     fetchData();
   };
 
+  const handleStartEvent = async () => {
+    if (!window.confirm("Are you sure you want to START the event for ALL waiting players?")) return;
+    const res = await fetch(`${API_BASE}/admin/event/start`, { method: 'POST', credentials: 'include' });
+    const data = await res.json();
+    alert(data.message);
+    fetchData();
+  };
+
+  const handleStopEvent = async () => {
+    if (!window.confirm("WARNING: Are you sure you want to FORCE STOP the event for all active players? (They will be marked as Timeout)")) return;
+    const res = await fetch(`${API_BASE}/admin/event/stop`, { method: 'POST', credentials: 'include' });
+    const data = await res.json();
+    alert(data.message);
+    fetchData();
+  };
+
   const formatTime = (ms) => {
     const totalSeconds = Math.floor(ms / 1000);
     const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
@@ -116,6 +132,14 @@ function AdminDashboard() {
       </header>
       
       {errorMsg && <div className="text-red mb-4">&gt; ERR: {errorMsg}</div>}
+
+      <div className="mb-8 p-4 panel flex-row justify-between items-center" style={{ border: '1px solid var(--accent-magenta)' }}>
+        <h3 className="text-magenta">&gt; GLOBAL EVENT CONTROLS</h3>
+        <div className="flex-row gap-4">
+          <button onClick={handleStartEvent} className="gold" style={{ padding: '0.5rem 2rem' }}>&gt; START EVENT</button>
+          <button onClick={handleStopEvent} className="red" style={{ padding: '0.5rem 2rem' }}>&gt; STOP EVENT</button>
+        </div>
+      </div>
 
       {activeTab === 'teams' && (
         <div className="panel" style={{ overflowX: 'auto' }}>
