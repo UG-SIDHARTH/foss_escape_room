@@ -231,7 +231,7 @@ function MissionDashboard() {
                             flexShrink: 0
                           }}>
                             <img 
-                              src={`/images/${m.hero.toLowerCase().replace(/\s+/g, '-')}.jpg`} 
+                              src={`/images/${m.hero.toLowerCase().replace(/\s+/g, '-')}.jpeg`} 
                               alt={m.hero}
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                               onError={(e) => { e.target.style.display = 'none'; }}
