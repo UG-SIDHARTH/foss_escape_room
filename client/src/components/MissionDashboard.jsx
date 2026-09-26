@@ -141,9 +141,14 @@ function MissionDashboard() {
             WARNING: You have 2 hints available. Using a hint will deduct 10 points from your final score.
           </p>
         </div>
-        <button onClick={handleStart} className="red" style={{ fontSize: '1.5rem', padding: '1rem 3rem' }}>
-          &gt; ENGAGE
-        </button>
+        <div className="mt-8 text-center" style={{ border: '1px solid var(--accent-blue)', padding: '2rem', background: 'rgba(0,0,0,0.5)' }}>
+          <h2 className="text-red mb-4">STATUS: IDLE</h2>
+          <p className="mb-8">Awaiting authorization from the Director.</p>
+          <div className="glitch text-blue text-2xl" data-text="WAITING FOR ADMIN TO START THE EVENT...">
+            WAITING FOR ADMIN TO START THE EVENT...
+          </div>
+          <p className="mt-4 text-sm" style={{ opacity: 0.7 }}>(This page will automatically update when the event begins)</p>
+        </div>
       </div>
     );
   }
