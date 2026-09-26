@@ -88,6 +88,23 @@ function AdminDashboard() {
     fetchData();
   };
 
+  const handleWipeData = async () => {
+    if (!window.confirm("CRITICAL WARNING: Are you sure you want to PERMANENTLY ERASE all agent registrations and scores? This cannot be undone!")) return;
+    if (window.prompt("Type 'CONFIRM' to execute data wipe:") !== 'CONFIRM') return;
+    const res = await fetch(`${API_BASE}/admin/event/reset-all`, { method: 'POST', credentials: 'include' });
+    const data = await res.json();
+    alert(data.message);
+    fetchData();
+  };
+
+  const handleClearLeaderboard = async () => {
+    if (!window.confirm("WARNING: Are you sure you want to CLEAR the leaderboard? (Agents will remain registered, but their progress and scores will be reset).")) return;
+    const res = await fetch(`${API_BASE}/admin/event/reset-leaderboard`, { method: 'POST', credentials: 'include' });
+    const data = await res.json();
+    alert(data.message);
+    fetchData();
+  };
+
   const formatTime = (ms) => {
     const totalSeconds = Math.floor(ms / 1000);
     const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
@@ -138,6 +155,8 @@ function AdminDashboard() {
         <div className="flex-row gap-4">
           <button onClick={handleStartEvent} className="gold" style={{ padding: '0.5rem 2rem' }}>&gt; START EVENT</button>
           <button onClick={handleStopEvent} className="red" style={{ padding: '0.5rem 2rem' }}>&gt; STOP EVENT</button>
+          <button onClick={handleClearLeaderboard} style={{ padding: '0.5rem 2rem', background: 'transparent', color: 'var(--error-color)', border: '1px solid var(--error-color)' }}>&gt; CLEAR SCORES</button>
+          <button onClick={handleWipeData} style={{ padding: '0.5rem 2rem', background: '#300', color: 'red', border: '1px solid red' }}>&gt; WIPE ALL DATA</button>
         </div>
       </div>
 

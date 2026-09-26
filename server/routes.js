@@ -66,6 +66,18 @@ router.post('/admin/event/stop', authenticateAdmin, (req, res) => {
   res.json({ success: true, message: `Stopped event for ${activeTeams.length} active agents.` });
 });
 
+router.post('/admin/event/reset-all', authenticateAdmin, (req, res) => {
+  db.prepare("DELETE FROM level_attempts").run();
+  db.prepare("DELETE FROM teams").run();
+  res.json({ success: true, message: 'All agent data has been permanently erased.' });
+});
+
+router.post('/admin/event/reset-leaderboard', authenticateAdmin, (req, res) => {
+  db.prepare("UPDATE teams SET current_level = 1, status = 'not_started', score = 0, hints_used = 0, keys_discovered = '[]', start_time = NULL, end_time = NULL, final_time = NULL, total_penalty_minutes = 0").run();
+  db.prepare("DELETE FROM level_attempts").run();
+  res.json({ success: true, message: 'Leaderboard cleared. All agents are back to STANDBY.' });
+});
+
 router.post('/admin/teams/:id/reset', authenticateAdmin, (req, res) => {
   const { id } = req.params;
   db.prepare("UPDATE teams SET current_level = 1, status = 'not_started', score = 0, hints_used = 0, keys_discovered = '[]' WHERE id = ?").run(id);
