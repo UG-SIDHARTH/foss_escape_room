@@ -1,96 +1,122 @@
 const express = require('express');
 const db = require('./db');
-const { validateAnswer, getLevelHint, getLevelInfo } = require('./puzzleLogic');
-const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'secret123';
+
+// Helper to get puzzle
+function getPuzzle(missionId) {
+  return db.prepare('SELECT * FROM puzzles WHERE mission_id = ?').get(missionId);
+}
 
 // POST /api/login - admin login
 router.post('/login', (req, res) => {
   const { password } = req.body;
   if (password === ADMIN_PASSWORD) {
-    const token = jwt.sign({ role: 'admin' }, JWT_SECRET, { expiresIn: '1d' });
-    res.cookie('admin_token', token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000
-    });
+    req.session.isAdmin = true;
     return res.json({ success: true });
   }
   return res.status(401).json({ error: 'Invalid password' });
 });
 
+// POST /api/logout
+router.post('/logout', (req, res) => {
+  req.session.destroy();
+  res.json({ success: true });
+});
+
 // Middleware to authenticate admin
 function authenticateAdmin(req, res, next) {
-  const token = req.cookies.admin_token;
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
-  try {
-    jwt.verify(token, JWT_SECRET);
+  if (req.session && req.session.isAdmin) {
     next();
-  } catch (err) {
+  } else {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 }
 
-// GET /api/admin/teams - fetch full team state for dashboard
+// Admin Dashboard Routes
 router.get('/admin/teams', authenticateAdmin, (req, res) => {
   const teams = db.prepare('SELECT * FROM teams').all();
   teams.forEach(t => {
     t.keys_discovered = JSON.parse(t.keys_discovered || '[]');
-    t.level_variants = JSON.parse(t.level_variants || '{}');
   });
   res.json(teams);
 });
 
-// GET /api/leaderboard - fetch public leaderboard state (stripped of secrets)
+router.post('/admin/teams/:id/reset', authenticateAdmin, (req, res) => {
+  const { id } = req.params;
+  db.prepare("UPDATE teams SET current_level = 1, status = 'not_started', score = 0, hints_used = 0, keys_discovered = '[]' WHERE id = ?").run(id);
+  res.json({ success: true });
+});
+
+router.post('/admin/teams/:id/level', authenticateAdmin, (req, res) => {
+  const { id } = req.params;
+  const { level } = req.body;
+  db.prepare('UPDATE teams SET current_level = ? WHERE id = ?').run(level, id);
+  res.json({ success: true });
+});
+
+router.get('/admin/puzzles', authenticateAdmin, (req, res) => {
+  const puzzles = db.prepare('SELECT * FROM puzzles').all();
+  res.json(puzzles);
+});
+
+router.post('/admin/puzzles/:id', authenticateAdmin, (req, res) => {
+  const { id } = req.params;
+  const { title, hero, content, answer, hint } = req.body;
+  db.prepare('UPDATE puzzles SET title = ?, hero = ?, content = ?, answer = ?, hint = ? WHERE mission_id = ?')
+    .run(title, hero, content, answer, hint, id);
+  res.json({ success: true });
+});
+
+// Public / Player Routes
 router.get('/leaderboard', (req, res) => {
   const teams = db.prepare('SELECT id, team_name, current_level, status, start_time, end_time, score, hints_used, final_time FROM teams').all();
+  teams.forEach(t => {
+    if (t.status === 'in_progress') {
+       t.current_time_ms = Date.now() - t.start_time;
+    }
+  });
+  teams.sort((a, b) => {
+    if (a.status === 'escaped' && b.status !== 'escaped') return -1;
+    if (b.status === 'escaped' && a.status !== 'escaped') return 1;
+    if (a.status === 'escaped' && b.status === 'escaped') {
+      if (b.score !== a.score) return b.score - a.score;
+      return a.final_time - b.final_time; 
+    }
+    if (a.current_level !== b.current_level) return b.current_level - a.current_level;
+    return (a.current_time_ms || 0) - (b.current_time_ms || 0);
+  });
   res.json(teams);
 });
 
-// GET /api/teams/:id - fetch team state
 router.get('/teams/:id', (req, res) => {
   const team = db.prepare('SELECT * FROM teams WHERE id = ?').get(req.params.id);
   if (!team) return res.status(404).json({ error: 'Team not found' });
-  team.keys_discovered = JSON.parse(team.keys_discovered);
+  team.keys_discovered = JSON.parse(team.keys_discovered || '[]');
   
-  // Attach current level info
-  const variants = JSON.parse(team.level_variants || '{}');
-  const variantId = variants[team.current_level] !== undefined ? variants[team.current_level] : 0;
-  const levelInfo = getLevelInfo(team.current_level, variantId);
-  if (levelInfo) {
-    team.level_name = levelInfo.name;
-    team.level_text = levelInfo.text;
+  const puzzle = getPuzzle(team.current_level);
+  if (puzzle) {
+    team.level_name = puzzle.title;
+    team.level_hero = puzzle.hero;
+    team.level_text = puzzle.content;
   }
-  
   res.json(team);
 });
 
-// POST /api/teams - register
 router.post('/teams', (req, res) => {
   const { team_name, members } = req.body;
   if (!team_name || !members) return res.status(400).json({ error: 'Missing fields' });
 
-  // Generate random variants for levels 1-5 (picking from 0, 1, 2)
-  const variants = {};
-  for(let i=1; i<=5; i++) {
-    variants[i] = Math.floor(Math.random() * 3);
-  }
-  variants[6] = 0; // Level 6 only has 1 variant
-
   try {
-    const info = db.prepare('INSERT INTO teams (team_name, members, level_variants) VALUES (?, ?, ?)').run(team_name, members, JSON.stringify(variants));
+    const info = db.prepare('INSERT INTO teams (team_name, members) VALUES (?, ?)').run(team_name, members);
     res.json({ id: info.lastInsertRowid, team_name, members });
   } catch (err) {
     res.status(400).json({ error: 'Team name might already exist' });
   }
 });
 
-// POST /api/teams/:id/start
 router.post('/teams/:id/start', (req, res) => {
   const team = db.prepare('SELECT * FROM teams WHERE id = ?').get(req.params.id);
   if (!team) return res.status(404).json({ error: 'Team not found' });
@@ -101,7 +127,6 @@ router.post('/teams/:id/start', (req, res) => {
   res.json({ success: true });
 });
 
-// POST /api/teams/:id/submit
 router.post('/teams/:id/submit', (req, res) => {
   const { answer } = req.body;
   const teamId = req.params.id;
@@ -111,54 +136,47 @@ router.post('/teams/:id/submit', (req, res) => {
     return res.status(400).json({ error: 'Invalid team or not in progress' });
   }
 
-  const variants = JSON.parse(team.level_variants || '{}');
-  const variantId = variants[team.current_level] !== undefined ? variants[team.current_level] : 0;
+  const puzzle = getPuzzle(team.current_level);
+  if (!puzzle) return res.status(500).json({ error: 'Puzzle not found' });
+
+  const isCorrect = answer.trim().toLowerCase() === puzzle.answer.trim().toLowerCase();
   
-  const { isCorrect, key_reward } = validateAnswer(team.current_level, variantId, answer, JSON.parse(team.keys_discovered));
-  
-  // Log attempt
   db.prepare('INSERT INTO level_attempts (team_id, level_number, submitted_answer, is_correct, timestamp) VALUES (?, ?, ?, ?, ?)').run(
     teamId, team.current_level, answer, isCorrect ? 1 : 0, Date.now()
   );
 
   if (isCorrect) {
+    const key_reward = \`\${puzzle.title}_CORE\`;
     if (team.current_level < 6) {
-      const keys = JSON.parse(team.keys_discovered);
+      const keys = JSON.parse(team.keys_discovered || '[]');
       keys.push(key_reward);
       db.prepare('UPDATE teams SET current_level = current_level + 1, keys_discovered = ? WHERE id = ?').run(JSON.stringify(keys), teamId);
-      return res.json({ success: true, message: 'Level complete!', key: key_reward });
+      return res.json({ success: true, message: 'MISSION COMPLETE!', key: key_reward });
     } else {
-      // Finished all levels
-      return res.json({ success: true, message: 'ESCAPE COMPLETE!' });
+      return res.json({ success: true, message: 'FOSS CORE RESTORED!' });
     }
   } else {
     return res.json({ success: false, message: 'Incorrect answer.' });
   }
 });
 
-// POST /api/teams/:id/hint
 router.post('/teams/:id/hint', (req, res) => {
   const teamId = req.params.id;
   const team = db.prepare('SELECT * FROM teams WHERE id = ?').get(teamId);
   if (!team || team.status !== 'in_progress') return res.status(400).json({ error: 'Invalid team' });
 
-  // Update hints used without time penalty
   db.prepare('UPDATE teams SET hints_used = hints_used + 1 WHERE id = ?').run(teamId);
 
-  const variants = JSON.parse(team.level_variants || '{}');
-  const variantId = variants[team.current_level] !== undefined ? variants[team.current_level] : 0;
-
-  const hintText = getLevelHint(team.current_level, variantId);
-  res.json({ success: true, hints_used: team.hints_used + 1, hint: hintText });
+  const puzzle = getPuzzle(team.current_level);
+  res.json({ success: true, hints_used: team.hints_used + 1, hint: puzzle.hint });
 });
 
-// POST /api/teams/:id/finish
 router.post('/teams/:id/finish', (req, res) => {
   const teamId = req.params.id;
   const team = db.prepare('SELECT * FROM teams WHERE id = ?').get(teamId);
   if (!team || team.status !== 'in_progress') return res.status(400).json({ error: 'Invalid team' });
 
-  if (team.current_level === 6) { // Make sure they actually solved level 6
+  if (team.current_level === 6) {
     const end_time = Date.now();
     const elapsed_ms = end_time - team.start_time;
     const elapsed_minutes = elapsed_ms / (1000 * 60);
@@ -172,7 +190,7 @@ router.post('/teams/:id/finish', (req, res) => {
 
     const hint_penalty = team.hints_used > 0 ? 10 : 0;
     let final_score = Math.max(0, base_score - hint_penalty);
-    if (base_score === 0) final_score = 0; // No points after 60 mins
+    if (base_score === 0) final_score = 0;
 
     db.prepare('UPDATE teams SET end_time = ?, final_time = ?, score = ?, status = ? WHERE id = ?').run(
       end_time, elapsed_ms, final_score, 'escaped', teamId
@@ -181,36 +199,6 @@ router.post('/teams/:id/finish', (req, res) => {
   } else {
     res.status(400).json({ error: 'Not finished yet' });
   }
-});
-
-// GET /api/leaderboard - fetch public leaderboard state (stripped of secrets)
-router.get('/leaderboard', (req, res) => {
-  const teams = db.prepare('SELECT id, team_name, current_level, status, start_time, end_time, score, hints_used, final_time FROM teams').all();
-  
-  teams.forEach(t => {
-    // calculate current time if still in progress
-    if (t.status === 'in_progress') {
-       const elapsed = Date.now() - t.start_time;
-       t.current_time_ms = elapsed;
-    }
-  });
-
-  // Sort: 'escaped' first by score (desc), then final_time (asc)
-  // 'in_progress' by level (desc) and current_time (asc)
-  teams.sort((a, b) => {
-    if (a.status === 'escaped' && b.status !== 'escaped') return -1;
-    if (b.status === 'escaped' && a.status !== 'escaped') return 1;
-    if (a.status === 'escaped' && b.status === 'escaped') {
-      if (b.score !== a.score) return b.score - a.score;
-      return a.final_time - b.final_time; // tie-breaker
-    }
-    
-    // Both in progress
-    if (a.current_level !== b.current_level) return b.current_level - a.current_level;
-    return (a.current_time_ms || 0) - (b.current_time_ms || 0);
-  });
-
-  res.json(teams);
 });
 
 module.exports = router;

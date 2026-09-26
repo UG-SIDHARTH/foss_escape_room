@@ -15,7 +15,7 @@ function AdminLogin() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
-        credentials: 'include' // allow cookies
+        credentials: 'include'
       });
       const data = await res.json();
       if (res.ok && data.success) {
@@ -30,8 +30,8 @@ function AdminLogin() {
 
   return (
     <div className="flex-col items-center" style={{ minHeight: '100vh', justifyContent: 'center' }}>
-      <h1 className="text-amber mb-4">&gt; ADMIN_LOGIN</h1>
-      {error && <div className="text-red mb-4">&gt; ERR: {error}</div>}
+      <h1 className="text-red mb-4 glitch" data-text="&gt; DIRECTOR_ACCESS_REQUIRED">&gt; DIRECTOR_ACCESS_REQUIRED</h1>
+      {error && <div className="text-red mb-4 p-2" style={{ border: '1px solid var(--error-color)' }}>&gt; ERR: {error}</div>}
       <form onSubmit={handleLogin} className="flex-col gap-4" style={{ width: '100%', maxWidth: '300px' }}>
         <input 
           type="password" 
@@ -39,7 +39,7 @@ function AdminLogin() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">&gt; AUTHENTICATE</button>
+        <button type="submit" className="red">&gt; AUTHENTICATE</button>
       </form>
     </div>
   );

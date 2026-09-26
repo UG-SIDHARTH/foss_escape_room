@@ -17,7 +17,7 @@ function EscapeComplete() {
     fetchTeam();
   }, [id]);
 
-  if (!team) return <div className="container">&gt; LOADING...</div>;
+  if (!team) return <div className="container">&gt; LOADING CORE...</div>;
 
   const formatTime = (ms) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -28,25 +28,24 @@ function EscapeComplete() {
 
   return (
     <div className="container flex-col items-center justify-center" style={{ minHeight: '100vh', textAlign: 'center' }}>
-      <h1 className="text-4xl text-amber glitch mb-8">&gt; ESCAPE COMPLETE</h1>
+      <h1 className="text-4xl text-blue glitch mb-4" data-text="&gt; FOSS CORE RESTORED">&gt; FOSS CORE RESTORED</h1>
+      <h2 className="text-gold mb-8">MISSION ACCOMPLISHED</h2>
       
-      <div className="p-8" style={{ border: '2px solid var(--accent-color)', maxWidth: '600px', width: '100%', boxSizing: 'border-box' }}>
-        <h2 className="mb-4">CERTIFICATE OF COMPLETION</h2>
-        <p className="mb-4 text-2xl">{team.team_name}</p>
-        <p className="mb-4">Operatives: {team.members}</p>
+      <div className="panel p-8" style={{ maxWidth: '600px', width: '100%', boxSizing: 'border-box' }}>
+        <h2 className="mb-4 text-red">CODE AVENGERS ROSTER</h2>
+        <p className="mb-4 text-2xl font-bold">{team.team_name}</p>
+        <p className="mb-4 text-blue">OPERATIVES: {team.members}</p>
         
-        <div className="flex-col gap-4 mt-8">
-          <div>&gt; BASE TIME: {formatTime(team.final_time - (team.total_penalty_minutes * 60 * 1000))}</div>
-          <div>&gt; PENALTIES: {team.total_penalty_minutes} MINUTES ({team.hints_used} HINTS)</div>
-          <div className="text-2xl mt-4">&gt; FINAL TIME: {formatTime(team.final_time)}</div>
+        <div className="flex-col gap-4 mt-8" style={{ borderTop: '2px solid var(--accent-blue)', paddingTop: '2rem' }}>
+          <div>&gt; TIME TAKEN: {formatTime(team.final_time)}</div>
+          <div>&gt; TACTICAL ASSISTS (HINTS): {team.hints_used}</div>
+          <div className="text-2xl mt-4 text-gold">&gt; FINAL SCORE: {team.score} PTS</div>
         </div>
       </div>
       
-      <div className="mt-8">
-        <button onClick={() => window.print()}>&gt; PRINT CERTIFICATE</button>
-      </div>
-      <div className="mt-4">
-        <a href="/leaderboard" className="text-amber">[ VIEW LEADERBOARD ]</a>
+      <div className="mt-8 flex-row gap-4">
+        <button className="gold" onClick={() => window.print()}>&gt; PRINT RECORD</button>
+        <button onClick={() => window.location.href = '/leaderboard'}>&gt; VIEW LEADERBOARD</button>
       </div>
     </div>
   );

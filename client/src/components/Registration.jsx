@@ -6,17 +6,13 @@ const API_BASE = '/api';
 function Registration() {
   const [teamName, setTeamName] = useState('');
   const [members, setMembers] = useState('');
-  const [error, setError] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    setError('');
-    
-    if (!teamName || !members) {
-      setError('ALL FIELDS REQUIRED.');
-      return;
-    }
+    setErrorMsg('');
+    if (!teamName || !members) return;
 
     try {
       const res = await fetch(`${API_BASE}/teams`, {
@@ -25,51 +21,50 @@ function Registration() {
         body: JSON.stringify({ team_name: teamName, members })
       });
       const data = await res.json();
-      
       if (res.ok) {
         navigate(`/mission/${data.id}`);
       } else {
-        setError(data.error || 'REGISTRATION FAILED.');
+        setErrorMsg(data.error || 'Registration failed');
       }
     } catch (err) {
-      setError('SYSTEM OFFLINE. BACKEND UNREACHABLE.');
+      setErrorMsg('Network error.');
     }
   };
 
   return (
-    <div className="container flex-col items-center justify-between" style={{ justifyContent: 'center', height: '100vh' }}>
-      <h1 className="text-4xl glitch mb-4">&gt; FOSS_ESCAPE_ROOM</h1>
-      <p className="mb-4 text-amber">INITIATE TEAM SEQUENCE</p>
+    <div className="container flex-col items-center justify-center" style={{ minHeight: '100vh', textAlign: 'center' }}>
+      <h1 className="text-4xl glitch mb-4" data-text="FOSS // CORE — SYSTEM FAILURE">
+        FOSS // CORE — SYSTEM FAILURE
+      </h1>
+      <h2 className="text-red mb-8">05 MODULES CORRUPTED</h2>
       
-      <form onSubmit={handleSubmit} className="flex-col gap-4" style={{ width: '100%', maxWidth: '400px' }}>
-        <div className="flex-col">
-          <label>&gt; TEAM_IDENTIFIER</label>
-          <input 
-            type="text" 
-            value={teamName} 
-            onChange={e => setTeamName(e.target.value)} 
-            placeholder="e.g. HackThePlanet"
-            autoFocus
-          />
-        </div>
-        
-        <div className="flex-col mt-4">
-          <label>&gt; OPERATIVES (comma separated)</label>
-          <input 
-            type="text" 
-            value={members} 
-            onChange={e => setMembers(e.target.value)} 
-            placeholder="Alice, Bob, Charlie"
-          />
-        </div>
+      <p className="mb-8" style={{ maxWidth: '600px', fontSize: '1.2rem' }}>
+        The code is broken. The team must assemble.<br/>
+        Recruiting Code Avengers to recover the encrypted modules and restore the core.
+      </p>
 
-        {error && <p className="text-red mt-4">&gt; ERR: {error}</p>}
-
-        <button type="submit" className="mt-4">&gt; REGISTER</button>
+      <form onSubmit={handleRegister} className="flex-col gap-4" style={{ width: '100%', maxWidth: '400px' }}>
+        <input 
+          type="text" 
+          placeholder="TEAM NAME" 
+          value={teamName} 
+          onChange={e => setTeamName(e.target.value)} 
+          required 
+        />
+        <input 
+          type="text" 
+          placeholder="OPERATIVES (Comma separated)" 
+          value={members} 
+          onChange={e => setMembers(e.target.value)} 
+          required 
+        />
+        <button type="submit" className="red mt-4">&gt; ASSEMBLE TEAM</button>
       </form>
+
+      {errorMsg && <div className="text-red mt-4">&gt; ERR: {errorMsg}</div>}
       
-      <div className="mt-4">
-        <a href="/leaderboard" className="text-amber">[ VIEW LEADERBOARD ]</a>
+      <div className="mt-8">
+        <a href="/admin/login" className="text-blue" style={{ fontSize: '0.8rem' }}>[ SYSADMIN LOGIN ]</a>
       </div>
     </div>
   );

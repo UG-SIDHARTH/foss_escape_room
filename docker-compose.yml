@@ -5,12 +5,17 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: foss-escape-room
+    container_name: foss-assemble
     ports:
       - "6001:6001"
     restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - SESSION_SECRET=foss-assemble-secret
     volumes:
-      # Mount the .env file so the container can access the admin password & JWT secret
+      # Mount the .env file so the container can access the admin password & secrets
       - ./server/.env:/app/server/.env
-      # (Optional) Mount the local database so it persists across container restarts
+      # Mount the local database so it persists across container restarts
       - ./server/escape_room.db:/app/server/escape_room.db
+      # Mount the certs directory to enable local HTTPS support
+      - ./certs:/app/certs

@@ -6,6 +6,7 @@ const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const cookieParser = require('cookie-parser');
+const session = require('express-session');
 
 dotenv.config();
 
@@ -18,6 +19,18 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+app.set('trust proxy', 1);
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'foss-assemble-secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: true, // Requires HTTPS
+    maxAge: 24 * 60 * 60 * 1000,
+    sameSite: 'none'
+  }
+}));
 
 app.use('/api', routes);
 
