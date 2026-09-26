@@ -10,8 +10,29 @@ function LevelView({ level, levelName, levelHero, levelText, onSubmit, onBack, i
       </button>
 
       <div className="panel mb-8">
-        <h2 className="text-gold mb-2">&gt; {levelName ? levelName.toUpperCase() : 'UNKNOWN'}</h2>
-        <h3 className="text-blue mb-4">HERO: {levelHero ? levelHero.toUpperCase() : 'UNKNOWN'}</h3>
+        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <h2 className="text-gold mb-2">&gt; {levelName ? levelName.toUpperCase() : 'UNKNOWN'}</h2>
+            <h3 className="text-blue mb-4">HERO: {levelHero ? levelHero.toUpperCase() : 'UNKNOWN'}</h3>
+          </div>
+          {levelHero && (
+            <div style={{ 
+              width: '80px', 
+              height: '80px', 
+              borderRadius: '50%', 
+              overflow: 'hidden', 
+              border: '2px solid var(--accent-magenta)',
+              flexShrink: 0
+            }}>
+              <img 
+                src={`/images/${levelHero.toLowerCase().replace(/\s+/g, '-')}.jpg`} 
+                alt={levelHero}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            </div>
+          )}
+        </div>
         
         {levelText ? (
           <div className="p-4 mt-4 text-lg" style={{ background: 'rgba(0,240,255,0.05)', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>

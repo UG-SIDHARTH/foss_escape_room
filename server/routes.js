@@ -147,7 +147,7 @@ router.post('/teams/:id/submit', (req, res) => {
 
   if (isCorrect) {
     const key_reward = `${puzzle.title}_CORE`;
-    if (team.current_level < 6) {
+    if (team.current_level < 7) {
       const keys = JSON.parse(team.keys_discovered || '[]');
       keys.push(key_reward);
       db.prepare('UPDATE teams SET current_level = current_level + 1, keys_discovered = ? WHERE id = ?').run(JSON.stringify(keys), teamId);
@@ -176,7 +176,7 @@ router.post('/teams/:id/finish', (req, res) => {
   const team = db.prepare('SELECT * FROM teams WHERE id = ?').get(teamId);
   if (!team || team.status !== 'in_progress') return res.status(400).json({ error: 'Invalid team' });
 
-  if (team.current_level === 6) {
+  if (team.current_level === 7) {
     const end_time = Date.now();
     const elapsed_ms = end_time - team.start_time;
     const elapsed_minutes = elapsed_ms / (1000 * 60);
@@ -199,6 +199,20 @@ router.post('/teams/:id/finish', (req, res) => {
   } else {
     res.status(400).json({ error: 'Not finished yet' });
   }
+});
+
+router.post('/teams/:id/timeout', (req, res) => {
+  const teamId = req.params.id;
+  const team = db.prepare('SELECT * FROM teams WHERE id = ?').get(teamId);
+  if (!team || team.status !== 'in_progress') return res.status(400).json({ error: 'Invalid team' });
+
+  const end_time = Date.now();
+  const elapsed_ms = end_time - team.start_time;
+
+  db.prepare('UPDATE teams SET end_time = ?, final_time = ?, score = ?, status = ? WHERE id = ?').run(
+    end_time, elapsed_ms, 0, 'timeout', teamId
+  );
+  res.json({ success: true });
 });
 
 module.exports = router;

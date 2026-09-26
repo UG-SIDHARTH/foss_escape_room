@@ -40,7 +40,7 @@ function Leaderboard() {
           <thead>
             <tr style={{ background: 'rgba(0,240,255,0.1)', textAlign: 'left' }}>
               <th className="p-4">RANK</th>
-              <th className="p-4">TEAM</th>
+              <th className="p-4">AGENT ALIAS</th>
               <th className="p-4">STATUS</th>
               <th className="p-4">CORES</th>
               <th className="p-4">HINTS</th>
@@ -51,7 +51,7 @@ function Leaderboard() {
           <tbody>
             {teams.length === 0 && (
               <tr>
-                <td colSpan="7" className="text-center p-4">&gt; NO TEAMS REGISTERED</td>
+                <td colSpan="7" className="text-center p-4">&gt; NO AGENTS REGISTERED</td>
               </tr>
             )}
             {teams.map((t, idx) => (
@@ -60,9 +60,10 @@ function Leaderboard() {
                 <td className="p-4 text-blue font-bold">{t.team_name}</td>
                 <td className="p-4">
                   {t.status === 'escaped' ? <span className="text-gold">RESTORED</span> : 
+                   t.status === 'timeout' ? <span className="text-red">FAILED</span> : 
                    t.status === 'in_progress' ? 'ACTIVE' : 'STANDBY'}
                 </td>
-                <td className="p-4">{Math.min(5, t.current_level - 1)}/5</td>
+                <td className="p-4">{Math.min(6, t.current_level - 1)}/6</td>
                 <td className="p-4">{t.hints_used}</td>
                 <td className="p-4">
                   {t.status === 'escaped' || t.status === 'in_progress'

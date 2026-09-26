@@ -28,13 +28,15 @@ function EscapeComplete() {
 
   return (
     <div className="container flex-col items-center justify-center" style={{ minHeight: '100vh', textAlign: 'center' }}>
-      <h1 className="text-4xl text-blue glitch mb-4" data-text="&gt; FOSS CORE RESTORED">&gt; FOSS CORE RESTORED</h1>
-      <h2 className="text-gold mb-8">MISSION ACCOMPLISHED</h2>
+      <h1 className="text-4xl text-blue glitch mb-4" data-text={team.status === 'timeout' ? "> SYSTEM COLLAPSE" : "> FOSS CORE RESTORED"}>
+        {team.status === 'timeout' ? "> SYSTEM COLLAPSE" : "> FOSS CORE RESTORED"}
+      </h1>
+      <h2 className="text-red mb-8">{team.status === 'timeout' ? "MISSION FAILED (TIME EXPIRED)" : "MISSION ACCOMPLISHED"}</h2>
       
       <div className="panel p-8" style={{ maxWidth: '600px', width: '100%', boxSizing: 'border-box' }}>
-        <h2 className="mb-4 text-red">CODE AVENGERS ROSTER</h2>
+        <h2 className="mb-4 text-red">AGENT PROFILE</h2>
         <p className="mb-4 text-2xl font-bold">{team.team_name}</p>
-        <p className="mb-4 text-blue">OPERATIVES: {team.members}</p>
+        <p className="mb-4 text-blue">FULL NAME: {team.members}</p>
         
         <div className="flex-col gap-4 mt-8" style={{ borderTop: '2px solid var(--accent-blue)', paddingTop: '2rem' }}>
           <div>&gt; TIME TAKEN: {formatTime(team.final_time)}</div>

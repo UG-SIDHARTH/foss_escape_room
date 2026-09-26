@@ -57,7 +57,14 @@ function initDb() {
     insert.run(3, 'SHIELD PROTOCOL', 'Captain America', 'Defense is down. We need the name of the most common symmetric encryption algorithm standard used today (3 letters).', 'AES', 'Advanced Encryption Standard.');
     insert.run(4, 'GAMMA ERROR', 'Hulk', 'A memory leak is causing a meltdown! The debugger output shows a Segmentation fault. What signal number represents SIGSEGV on most POSIX systems?', '11', 'Look up Linux signal numbers.');
     insert.run(5, 'MIND OF CODE', 'Vision', 'The core kernel was written by one man in 1991. What is his first name?', 'Linus', 'He also created Git.');
-    insert.run(6, 'AVENGERS ASSEMBLE', 'All', 'Combine the fragments: What is the ultimate open-source operating system kernel?', 'Linux', 'It relates to mission 5.');
+    insert.run(6, 'THUNDER STRIKE', 'Thor', 'A massive DDoS storm is hitting the servers! We need to redirect traffic back to the source loopback address. What is the standard IPv4 loopback address?', '127.0.0.1', 'There is no place like home.');
+    insert.run(7, 'AVENGERS ASSEMBLE', 'All', 'Combine the fragments: What is the ultimate open-source operating system kernel?', 'Linux', 'It relates to mission 5.');
+  } else if (count.count === 6) {
+    // Migrate old db schema to 7 puzzles
+    db.prepare('UPDATE puzzles SET title = ?, hero = ?, content = ?, answer = ?, hint = ? WHERE mission_id = 6')
+      .run('THUNDER STRIKE', 'Thor', 'A massive DDoS storm is hitting the servers! We need to redirect traffic back to the source loopback address. What is the standard IPv4 loopback address?', '127.0.0.1', 'There is no place like home.');
+    db.prepare('INSERT INTO puzzles (mission_id, title, hero, content, answer, hint) VALUES (?, ?, ?, ?, ?, ?)')
+      .run(7, 'AVENGERS ASSEMBLE', 'All', 'Combine the fragments: What is the ultimate open-source operating system kernel?', 'Linux', 'It relates to mission 5.');
   }
 }
 

@@ -86,7 +86,7 @@ function AdminDashboard() {
       <header className="flex-row justify-between items-center mb-8">
         <h1 className="text-4xl text-red">&gt; S.H.I.E.L.D. OVERRIDE DASHBOARD</h1>
         <div className="flex-row gap-4">
-          <button onClick={() => setActiveTab('teams')} className={activeTab === 'teams' ? 'gold' : ''}>TEAMS</button>
+          <button onClick={() => setActiveTab('teams')} className={activeTab === 'teams' ? 'gold' : ''}>AGENTS</button>
           <button onClick={() => setActiveTab('puzzles')} className={activeTab === 'puzzles' ? 'gold' : ''}>PUZZLES</button>
         </div>
       </header>
@@ -99,7 +99,7 @@ function AdminDashboard() {
             <thead>
               <tr style={{ borderBottom: '2px solid var(--accent-blue)', textAlign: 'left' }}>
                 <th className="p-4">ID</th>
-                <th className="p-4">TEAM NAME</th>
+                <th className="p-4">AGENT ALIAS</th>
                 <th className="p-4">STATUS</th>
                 <th className="p-4">LEVEL</th>
                 <th className="p-4">HINTS</th>
@@ -112,7 +112,7 @@ function AdminDashboard() {
                 <tr key={t.id} style={{ borderBottom: '1px solid #333' }}>
                   <td className="p-4">{t.id}</td>
                   <td className="p-4 font-bold">{t.team_name}</td>
-                  <td className="p-4">{t.status === 'escaped' ? <span className="text-gold">ESCAPED</span> : t.status === 'in_progress' ? 'ACTIVE' : 'IDLE'}</td>
+                  <td className="p-4">{t.status === 'escaped' ? <span className="text-gold">ESCAPED</span> : t.status === 'timeout' ? <span className="text-red">TIMEOUT</span> : t.status === 'in_progress' ? 'ACTIVE' : 'IDLE'}</td>
                   <td className="p-4 text-blue cursor-pointer" onClick={() => handleUpdateLevel(t.id, t.current_level)}>
                     {t.current_level} ✏️
                   </td>

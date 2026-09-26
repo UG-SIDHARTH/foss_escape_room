@@ -39,26 +39,26 @@ function Registration() {
       <h2 className="text-red mb-8">05 MODULES CORRUPTED</h2>
       
       <p className="mb-8" style={{ maxWidth: '600px', fontSize: '1.2rem' }}>
-        The code is broken. The team must assemble.<br/>
-        Recruiting Code Avengers to recover the encrypted modules and restore the core.
+        The code is broken. A hero must rise.<br/>
+        Recruiting a Code Avenger to recover the encrypted modules and restore the core.
       </p>
 
       <form onSubmit={handleRegister} className="flex-col gap-4" style={{ width: '100%', maxWidth: '400px' }}>
         <input 
           type="text" 
-          placeholder="TEAM NAME" 
+          placeholder="AGENT ALIAS" 
           value={teamName} 
           onChange={e => setTeamName(e.target.value)} 
           required 
         />
         <input 
           type="text" 
-          placeholder="OPERATIVES (Comma separated)" 
+          placeholder="FULL NAME" 
           value={members} 
           onChange={e => setMembers(e.target.value)} 
           required 
         />
-        <button type="submit" className="red mt-4">&gt; ASSEMBLE TEAM</button>
+        <button type="submit" className="red mt-4">&gt; BEGIN MISSION</button>
       </form>
 
       {errorMsg && <div className="text-red mt-4">&gt; ERR: {errorMsg}</div>}

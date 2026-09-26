@@ -10,7 +10,8 @@ const MISSIONS = [
   { id: 3, name: 'SHIELD PROTOCOL', hero: 'Captain America' },
   { id: 4, name: 'GAMMA ERROR', hero: 'Hulk' },
   { id: 5, name: 'MIND OF CODE', hero: 'Vision' },
-  { id: 6, name: 'AVENGERS ASSEMBLE', hero: 'All' }
+  { id: 6, name: 'THUNDER STRIKE', hero: 'Thor' },
+  { id: 7, name: 'AVENGERS ASSEMBLE', hero: 'All' }
 ];
 
 function MissionDashboard() {
@@ -30,7 +31,7 @@ function MissionDashboard() {
       if (res.ok) {
         const data = await res.json();
         setTeam(data);
-        if (data.status === 'escaped') {
+        if (data.status === 'escaped' || data.status === 'timeout') {
           navigate(`/complete/${id}`);
         }
       }
@@ -49,12 +50,21 @@ function MissionDashboard() {
 
   useEffect(() => {
     if (team && team.status === 'in_progress') {
-      const interval = setInterval(() => {
-        setElapsedMs(Date.now() - team.start_time);
+      const interval = setInterval(async () => {
+        const currentElapsed = Date.now() - team.start_time;
+        setElapsedMs(currentElapsed);
+
+        if (currentElapsed >= 3600000) {
+          clearInterval(interval);
+          try {
+            await fetch(`${API_BASE}/teams/${id}/timeout`, { method: 'POST' });
+            fetchTeam();
+          } catch(err) {}
+        }
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [team]);
+  }, [team, id]);
 
   const handleStart = async () => {
     try {
@@ -105,7 +115,7 @@ function MissionDashboard() {
   };
 
   if (loading) return <div className="container">&gt; LOADING CORE...</div>;
-  if (!team) return <div className="container text-red">&gt; TEAM NOT FOUND</div>;
+  if (!team) return <div className="container text-red">&gt; AGENT NOT FOUND</div>;
 
   const formatTime = (ms) => {
     const totalSecondsElapsed = Math.floor(ms / 1000);
@@ -122,30 +132,30 @@ function MissionDashboard() {
         <p className="mb-4 text-xl text-gold">Welcome, {team.team_name}.</p>
         <div className="panel mb-8 text-center" style={{ maxWidth: '600px' }}>
           <p className="mb-4">
-            The FOSS Core has been fragmented across 5 encrypted modules by an unknown threat.
+            The FOSS Core has been fragmented across 6 encrypted modules by an unknown threat.
           </p>
           <p className="mb-4">
-            You must assume the roles of the Code Avengers. Recover all 5 Core Fragments before the system collapses in exactly 60 minutes.
+            You must assume the role of the ultimate Code Avenger. Recover all 6 Core Fragments before the system collapses in exactly 60 minutes.
           </p>
           <p className="text-red">
             WARNING: You have 2 hints available. Using a hint will deduct 10 points from your final score.
           </p>
         </div>
         <button onClick={handleStart} className="red" style={{ fontSize: '1.5rem', padding: '1rem 3rem' }}>
-          &gt; ASSEMBLE
+          &gt; ENGAGE
         </button>
       </div>
     );
   }
 
-  const coresRecovered = Math.min(5, team.current_level - 1);
+  const coresRecovered = Math.min(6, team.current_level - 1);
 
   return (
     <div className="container flex-col" style={{ minHeight: '100vh' }}>
       <header className="flex-row justify-between items-center p-4 mb-8" style={{ borderBottom: '2px solid var(--accent-blue)', background: 'rgba(0,240,255,0.05)' }}>
         <div>
           <h2 className="text-gold glitch" data-text={team.team_name}>{team.team_name}</h2>
-          <p className="text-blue font-bold">⚡ {coresRecovered}/5 CORES RECOVERED</p>
+          <p className="text-blue font-bold">⚡ {coresRecovered}/6 CORES RECOVERED</p>
         </div>
         <div className="text-right">
           <h2 className="text-red" style={{ fontSize: '2.5rem' }}>&gt; T- {formatTime(elapsedMs)}</h2>
@@ -196,14 +206,32 @@ function MissionDashboard() {
                            {isCurrent && <span className="mc-tag">MY HEROES</span>}
                         </div>
                         
-                        <div className="mc-body">
-                          <h2 className="mc-title">{m.hero.toUpperCase()}</h2>
-                          <h4 className="mc-subtitle">MISSION: {m.name}</h4>
-                          <p className="mc-desc">
-                            {isLocked ? "ACCESS DENIED. Awaiting prior module restoration." : 
-                             isCompleted ? "MODULE RESTORED. System integration complete. The code is secure." : 
-                             "MODULE CORRUPTED. Ready for Code Avenger override. Deploying countermeasures..."}
-                          </p>
+                        <div className="mc-body" style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+                          <div style={{ flex: 1 }}>
+                            <h2 className="mc-title">{m.hero.toUpperCase()}</h2>
+                            <h4 className="mc-subtitle">MISSION: {m.name}</h4>
+                            <p className="mc-desc">
+                              {isLocked ? "ACCESS DENIED. Awaiting prior module restoration." : 
+                               isCompleted ? "MODULE RESTORED. System integration complete. The code is secure." : 
+                               "MODULE CORRUPTED. Ready for Code Avenger override. Deploying countermeasures..."}
+                            </p>
+                          </div>
+                          <div style={{ 
+                            width: '120px', 
+                            height: '120px', 
+                            borderRadius: '50%', 
+                            overflow: 'hidden', 
+                            border: '3px solid var(--accent-magenta)',
+                            boxShadow: '0 0 15px var(--accent-magenta-dim)',
+                            flexShrink: 0
+                          }}>
+                            <img 
+                              src={`/images/${m.hero.toLowerCase().replace(/\s+/g, '-')}.jpg`} 
+                              alt={m.hero}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              onError={(e) => { e.target.style.display = 'none'; }}
+                            />
+                          </div>
                         </div>
 
                         <div className="mc-footer">
