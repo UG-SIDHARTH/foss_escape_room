@@ -12,10 +12,12 @@ services:
     environment:
       - NODE_ENV=production
       - SESSION_SECRET=foss-assemble-secret
+      # - ADMIN_PASSWORD=your_secure_password_here
+    # Note: If you want to use a .env file, uncomment the lines below instead of mounting it as a volume!
+    # env_file:
+    #   - ./server/.env
     volumes:
-      # Mount the .env file so the container can access the admin password & secrets
-      - ./server/.env:/app/server/.env
-      # Mount the local database so it persists across container restarts
-      - ./server/escape_room.db:/app/server/escape_room.db
-      # Mount the certs directory to enable local HTTPS support
+      # Mount the data DIRECTORY instead of the file directly to prevent Docker from creating a directory!
+      - ./server/data:/app/server/data
+      # Mount the certs directory to enable local HTTPS support (optional if behind Cloudflare)
       - ./certs:/app/certs
