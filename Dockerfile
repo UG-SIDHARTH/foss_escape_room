@@ -1,27 +1,32 @@
 # Stage 1: Build the React frontend
-FROM node:22 AS builder
+FROM node:22-slim AS builder
+
+# Set memory limit for Node.js to prevent crashes on low-RAM machines (like 4GB RAM)
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 WORKDIR /app/client
 COPY client/package*.json ./
-RUN npm install
+# Use npm ci for a faster, reproducible install if package-lock is present, else npm install
+RUN npm install && npm cache clean --force
+
 COPY client/ ./
 # We pass an environment variable if needed, but relative /api works fine without it
 RUN npm run build
 
 # Stage 2: Setup the Express backend
-FROM node:22
+FROM node:22-slim
+
+# Set Node to production mode to optimize performance
+ENV NODE_ENV=production
 
 WORKDIR /app
 
 COPY server/package*.json ./server/
 WORKDIR /app/server
-RUN npm install --production
+RUN npm install --production && npm cache clean --force
 
 # Copy the server source code
 COPY server/ ./
-# We don't copy the certs/ directory because production deployment 
-# usually happens behind a reverse proxy (Nginx/Traefik/Cloudflare) or uses a PaaS.
-# However, if local certs exist mounted in a volume, it will fall back correctly.
 
 # Copy the built frontend static files from Stage 1
 COPY --from=builder /app/client/dist /app/client/dist
