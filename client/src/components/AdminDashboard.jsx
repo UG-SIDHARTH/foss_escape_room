@@ -350,35 +350,56 @@ function AdminDashboard() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 {puzzles.map(p => (
-                  <div key={p.mission_id} style={{ borderBottom: '1px solid #27272a', paddingBottom: '2rem' }}>
-                    <h4 style={{ color: '#60a5fa', marginBottom: '1rem', marginTop: 0 }}>MISSION 0{p.mission_id}: {p.title}</h4>
-                    <form onSubmit={(e) => handlePuzzleUpdate(e, p)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      <div className="admin-flex-row">
-                        <div className="admin-flex-col">
-                          <label className="stat-label">Title</label>
-                          <input name="title" defaultValue={p.title} className="admin-input" />
+                  <div key={p.mission_id} style={{ borderBottom: '1px solid #27272a', paddingBottom: '2rem', display: 'flex', gap: '2rem', alignItems: 'flex-start' }}>
+                    {/* Hero Image */}
+                    <div style={{ 
+                      width: '120px', 
+                      height: '120px', 
+                      borderRadius: '50%', 
+                      overflow: 'hidden', 
+                      border: '3px solid #8b5cf6',
+                      boxShadow: '0 0 15px rgba(139, 92, 246, 0.3)',
+                      flexShrink: 0,
+                      marginTop: '0.5rem'
+                    }}>
+                      <img 
+                        src={`/images/${p.hero.toLowerCase().replace(/\s+/g, '-')}.jpeg`} 
+                        alt={p.hero}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#000' }}
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    </div>
+
+                    <div style={{ flex: 1 }}>
+                      <h4 style={{ color: '#60a5fa', marginBottom: '1rem', marginTop: 0 }}>MISSION 0{p.mission_id}: {p.title}</h4>
+                      <form onSubmit={(e) => handlePuzzleUpdate(e, p)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div className="admin-flex-row">
+                          <div className="admin-flex-col">
+                            <label className="stat-label">Title</label>
+                            <input name="title" defaultValue={p.title} className="admin-input" />
+                          </div>
+                          <div className="admin-flex-col">
+                            <label className="stat-label">Hero</label>
+                            <input name="hero" defaultValue={p.hero} className="admin-input" />
+                          </div>
                         </div>
                         <div className="admin-flex-col">
-                          <label className="stat-label">Hero</label>
-                          <input name="hero" defaultValue={p.hero} className="admin-input" />
+                          <label className="stat-label">Content</label>
+                          <textarea name="content" defaultValue={p.content} className="admin-textarea"></textarea>
                         </div>
-                      </div>
-                      <div className="admin-flex-col">
-                        <label className="stat-label">Content</label>
-                        <textarea name="content" defaultValue={p.content} className="admin-textarea"></textarea>
-                      </div>
-                      <div className="admin-flex-row">
-                        <div className="admin-flex-col">
-                          <label className="stat-label">Answer</label>
-                          <input name="answer" defaultValue={p.answer} className="admin-input" />
+                        <div className="admin-flex-row">
+                          <div className="admin-flex-col">
+                            <label className="stat-label">Answer</label>
+                            <input name="answer" defaultValue={p.answer} className="admin-input" />
+                          </div>
+                          <div className="admin-flex-col">
+                            <label className="stat-label">Hint</label>
+                            <input name="hint" defaultValue={p.hint} className="admin-input" />
+                          </div>
                         </div>
-                        <div className="admin-flex-col">
-                          <label className="stat-label">Hint</label>
-                          <input name="hint" defaultValue={p.hint} className="admin-input" />
-                        </div>
-                      </div>
-                      <button type="submit" className="admin-btn-primary" style={{ alignSelf: 'flex-start', marginTop: '0.5rem' }}>Save Override</button>
-                    </form>
+                        <button type="submit" className="admin-btn-primary" style={{ alignSelf: 'flex-start', marginTop: '0.5rem' }}>Save Override</button>
+                      </form>
+                    </div>
                   </div>
                 ))}
               </div>

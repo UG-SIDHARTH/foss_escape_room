@@ -6,3 +6,4 @@ certs/
 .vscode
 .DS_Store
 npm-debug.log
+server/data/*.db
