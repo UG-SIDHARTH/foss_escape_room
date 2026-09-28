@@ -167,7 +167,7 @@ function MissionDashboard() {
         </div>
       </header>
 
-      <div className="flex-row gap-8" style={{ alignItems: 'flex-start' }}>
+      <div className="dashboard-layout-row">
         
         <main className="flex-col w-full" style={{ flexGrow: 1 }}>
           {successMsg && (
@@ -233,7 +233,7 @@ function MissionDashboard() {
                             <img 
                               src={`/images/${m.hero.toLowerCase().replace(/\s+/g, '-')}.jpeg`} 
                               alt={m.hero}
-                              style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#000' }}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
                               onError={(e) => { e.target.style.display = 'none'; }}
                             />
                           </div>

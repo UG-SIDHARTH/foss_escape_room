@@ -365,7 +365,7 @@ function AdminDashboard() {
                       <img 
                         src={`/images/${p.hero.toLowerCase().replace(/\s+/g, '-')}.jpeg`} 
                         alt={p.hero}
-                        style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#000' }}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top' }}
                         onError={(e) => { e.target.style.display = 'none'; }}
                       />
                     </div>

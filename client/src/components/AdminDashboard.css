@@ -440,3 +440,30 @@
 }
 .admin-mt-4 { margin-top: 1rem; }
 .admin-mb-4 { margin-bottom: 1rem; }
+
+/* Mobile Responsiveness */
+@media (max-width: 900px) {
+  .admin-layout {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    width: 100%;
+  }
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .admin-flex-row {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 500px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+}

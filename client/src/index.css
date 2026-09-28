@@ -407,3 +407,30 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+/* Responsive Overrides */
+.dashboard-layout-row {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 900px) {
+  .dashboard-layout-row {
+    flex-direction: column;
+  }
+  .mc-body {
+    margin-left: 1rem;
+    max-width: 100%;
+    flex-direction: column;
+    text-align: center;
+  }
+  .mc-footer {
+    justify-content: center;
+  }
+  .panel {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+}
