@@ -17,7 +17,7 @@ export default defineConfig(({ command, mode }) => {
       react()
     ],
     server: {
-      port: 6000,
+      port: 5173,
       https: true,
       proxy: {
         '/api': {
