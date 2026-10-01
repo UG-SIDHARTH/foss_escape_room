@@ -43,3 +43,21 @@ npm run dev
 ### 4. Access the App
 - **Player Terminal**: `https://localhost:6000`
 - **Admin Dashboard**: `https://localhost:6000/admin`
+
+## Running with Docker
+
+Alternatively, you can run the entire application using Docker Compose. Ensure you have Docker and Docker Compose installed.
+
+### 1. Generate Local Certificates
+Follow the instructions in the first step above to generate local certificates in the `certs` directory.
+
+### 2. Start the App
+Run the following command in the root of the project:
+```bash
+docker compose up --build -d
+```
+This will build and start the application in detached mode.
+
+### 3. Access the App (Docker)
+- **Player Terminal**: `https://localhost:6001`
+- **Admin Dashboard**: `https://localhost:6001/admin`
